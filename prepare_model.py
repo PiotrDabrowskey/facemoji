@@ -56,7 +56,7 @@ def process_photos(emotions):
         for photo in photos:
             image = Image.open(photo)
             cords = map(int, photo.split('/')[2].split('.')[0].split(','))
-            filename = 'processed/' + emotion + '/' + str(index) + '.' + photo.split('.')[1]
+            filename = 'data_processed/' + emotion + '/' + str(index) + '.' + photo.split('.')[1]
             crop_face(image,
                       eye_left=(int(cords[0]), cords[1]),
                       eye_right=(cords[2], cords[3]),
@@ -69,7 +69,7 @@ def get_dataset(emotions):
     data = []
     labels = []
     for emotion in emotions:
-        photos = glob.glob('processed/%s/*' % emotion)
+        photos = glob.glob('data_processed/%s/*' % emotion)
         for item in photos:
             image = cv2.imread(item)  # open image
             gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)  # convert to grayscale
@@ -99,4 +99,4 @@ if __name__ == '__main__':
     accuracy = evaluate_model(data, labels, model)
     print('trained model accuracy (on train data): {}'.format(accuracy))
 
-    model.save('emotion_detection_model.xml')
+    model.save('models/emotion_detection_model.xml')
