@@ -22,7 +22,6 @@ def detect_face_and_crop(image):
     (x, y, w, h) = faces[0]
     if w == 0 or h == 0 or y+h > image.shape[0] or x+w > image.shape[1]:
         return None
-    print (x, y, w, h)
     return image[y:y+h, x:x+w]
 
 
