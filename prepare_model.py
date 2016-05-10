@@ -1,10 +1,13 @@
 import Image
 import glob
 import math
+import random
 import numpy as np
-from sklearn.metrics import accuracy_score
+from face_detect import detect_faces
 
 import cv2
+
+fishface = cv2.createFisherFaceRecognizer() #Initialize fisher face classifier
 
 
 def distance(p1, p2):
@@ -51,52 +54,86 @@ def crop_face(image, eye_left=(0, 0), eye_right=(0, 0), offset_pct=(0.2, 0.2), d
 
 def process_photos(emotions):
     for emotion in emotions:
-        photos = glob.glob('data/%s/*' % emotion)
-        index = 1
+        photos = glob.glob('data/sorted_set/%s/*' % emotion)
+        filenumber = 1
+
         for photo in photos:
             image = Image.open(photo)
-            cords = map(int, photo.split('/')[2].split('.')[0].split(','))
-            filename = 'data_processed/' + emotion + '/' + str(index) + '.' + photo.split('.')[1]
-            crop_face(image,
-                      eye_left=(int(cords[0]), cords[1]),
-                      eye_right=(cords[2], cords[3]),
-                      offset_pct=(0.3, 0.3),
-                      dest_sz=(200, 200)).save(filename)
-            index += 1
+            frame = cv2.imread(photo)
+            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            faces = detect_faces(frame)
 
+            for (x, y, w, h) in faces:  # get coordinates and size of rectangle containing face
+                gray = gray[y:y + h, x:x + w]  # Cut the frame to size
 
-def get_dataset(emotions):
-    data = []
-    labels = []
+                try:
+                    out = cv2.resize(gray, (350, 350))  # Resize face so all images have same size
+                    cv2.imwrite("data/processed/%s/%s.jpg" % (emotion, filenumber), out)  # Write image
+                except:
+                    print('error in processing %s' %photo)
+
+            filenumber += 1  # Increment image number
+
+def get_files(emotion): #Define function to get file list, randomly shuffle it and split 80/20
+    files = glob.glob("data/processed/%s/*" %emotion)
+    random.shuffle(files)
+    training = files[:int(len(files)*0.8)] #get first 80% of file list
+    prediction = files[-int(len(files)*0.2):] #get last 20% of file list
+    return training, prediction
+
+def make_sets():
+    training_data = []
+    training_labels = []
+    prediction_data = []
+    prediction_labels = []
     for emotion in emotions:
-        photos = glob.glob('data_processed/%s/*' % emotion)
-        for item in photos:
-            image = cv2.imread(item)  # open image
-            gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)  # convert to grayscale
-            data.append(gray)  # append image array to training data list
-            labels.append(emotions.index(emotion))  # add numeric label
-    return data, labels
+        training, prediction = get_files(emotion)
+        #Append data to training and prediction list, and generate labels 0-7
+        for item in training:
+            image = cv2.imread(item) #open image
+            gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY) #convert to grayscale
+            training_data.append(gray) #append image array to training data list
+            training_labels.append(emotions.index(emotion))
 
+        for item in prediction: #repeat above process for prediction set
+            image = cv2.imread(item)
+            gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+            prediction_data.append(gray)
+            prediction_labels.append(emotions.index(emotion))
 
-def train_model(data, labels):
-    fisher_face = cv2.createFisherFaceRecognizer()  # initialize fisher face classifier
-    fisher_face.train(data, np.asarray(labels))  # train model
-    return fisher_face
+    return training_data, training_labels, prediction_data, prediction_labels
 
+def run_recognizer():
+    training_data, training_labels, prediction_data, prediction_labels = make_sets()
 
-def evaluate_model(data, labels, model):
-    predicted = [model.predict(x)[0] for x in data]
-    return accuracy_score(labels, predicted)
+    print "training fisher face classifier"
+    print "size of training set is:", len(training_labels), "images"
+    fishface.train(training_data, np.asarray(training_labels))
 
+    print "predicting classification set"
+    cnt = 0
+    correct = 0
+    incorrect = 0
+    for image in prediction_data:
+        pred, conf = fishface.predict(image)
+        if pred == prediction_labels[cnt]:
+            correct += 1
+            cnt += 1
+        else:
+            incorrect += 1
+            cnt += 1
+    return ((100 * correct) / (correct + incorrect))
 
 if __name__ == '__main__':
-    emotions = ['happy', 'sad']
-    process_photos(emotions)
+    emotions = ['neutral', 'happy', 'sadness']
+    #process_photos(emotions)
 
-    data, labels = get_dataset(emotions)
-    model = train_model(data, labels)
+    metascore = []
+    for i in range(0, 10):
+        correct = run_recognizer()
+        print "got", correct, "percent correct!"
+        metascore.append(correct)
 
-    accuracy = evaluate_model(data, labels, model)
-    print('trained model accuracy (on train data): {}'.format(accuracy))
+    print "\n\nend score:", np.mean(metascore), "percent correct!"
 
-    model.save('models/emotion_detection_model.xml')
+    fishface.save('models/emotion_detection_model.xml')
