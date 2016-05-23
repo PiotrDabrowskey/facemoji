@@ -9,7 +9,7 @@ def detect_faces(image):
         gray,
         scaleFactor=1.1,
         minNeighbors=15,
-        minSize=(100, 100),
+        minSize=(150, 150),
         flags=cv2.cv.CV_HAAR_SCALE_IMAGE
     )
     return faces  # list of (x, y, w, h)
