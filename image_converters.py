@@ -1,4 +1,8 @@
-import Image, cv2
+import cv2
+if cv2.__version__ == '3.1.0':
+    from PIL import Image
+else:
+    import Image
 import numpy as np
 
 

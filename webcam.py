@@ -1,6 +1,13 @@
-import cv2, Image
-from face_detect import detect_faces, crop_face
+import cv2
+if cv2.__version__ == '3.1.0':
+    from PIL import Image
+else:
+    import Image
+from cv2 import WINDOW_NORMAL
+
+from face_detect import detect_faces
 from image_converters import nparray_as_image, image_as_nparray
+
 
 def load_emoticons(emotions):
     emoticons = []
@@ -10,8 +17,9 @@ def load_emoticons(emotions):
     return emoticons
 
 def show_webcam_and_run(model, emoticons):
-    cv2.namedWindow('webcam')
-    cv2.namedWindow('face_preview')
+    cv2.namedWindow('webcam', WINDOW_NORMAL)
+    cv2.resizeWindow('webcam', 1600, 1200)
+    # cv2.namedWindow('face_preview')
 
     vc = cv2.VideoCapture(0)
     rval, frame = vc.read() if vc.isOpened() else None
@@ -24,7 +32,7 @@ def show_webcam_and_run(model, emoticons):
             if cropped is not None:  # if face detected
                 image = cv2.resize(cropped, (350, 350))  # reize to model's input
                 gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)  # convert to grayscale
-                cv2.imshow('face_preview', gray)  # face visualization
+                # cv2.imshow('face_preview', gray)  # face visualization
 
                 prediction = model.predict(gray)  # do prediction
                 img_to_draw = emoticons[prediction[0]]
@@ -37,7 +45,7 @@ def show_webcam_and_run(model, emoticons):
         cv2.imshow('webcam', frame)
 
         rval, frame = vc.read()
-        key = cv2.waitKey(1)
+        key = cv2.waitKey(10)
         if key == 27:  # exit on ESC
             break
     cv2.destroyWindow('webcam')
@@ -49,7 +57,10 @@ if __name__ == '__main__':
     emoticons = load_emoticons(emotions)
 
     # load model
-    fisher_face = cv2.createFisherFaceRecognizer()
+    if cv2.__version__ == '3.1.0':
+        fisher_face = cv2.face.createFisherFaceRecognizer()
+    else:
+        fisher_face = cv2.createFisherFaceRecognizer()
     fisher_face.load('models/emotion_detection_model.xml')
 
     # use learnt model
