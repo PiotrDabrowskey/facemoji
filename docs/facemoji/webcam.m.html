@@ -4,7 +4,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 
     <title>facemoji.webcam API documentation</title>
-    <meta name="description" content="" />
+    <meta name="description" content="This module is the main module in this package. It loads emotion recognition model from a file,
+show..." />
 
   <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,300' rel='stylesheet' type='text/css'>
   
@@ -998,11 +999,16 @@ table {
 
   <header id="section-intro">
   <h1 class="title"><span class="name">facemoji.webcam</span> module</h1>
-  
+  <p>This module is the main module in this package. It loads emotion recognition model from a file,
+shows a webcam image, recognizes face and it's emotion and draw emotion on the image.</p>
   
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-facemoji.webcam', this);">Show source &equiv;</a></p>
   <div id="source-facemoji.webcam" class="source">
-    <pre><code>from cv2 import WINDOW_NORMAL
+    <pre><code>"""
+This module is the main module in this package. It loads emotion recognition model from a file,
+shows a webcam image, recognizes face and it's emotion and draw emotion on the image.
+"""
+from cv2 import WINDOW_NORMAL
 
 import cv2
 from face_detect import find_faces

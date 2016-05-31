@@ -4,7 +4,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 
     <title>facemoji.face_detect API documentation</title>
-    <meta name="description" content="" />
+    <meta name="description" content="This module contains face detections functions." />
 
   <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,300' rel='stylesheet' type='text/css'>
   
@@ -998,11 +998,14 @@ table {
 
   <header id="section-intro">
   <h1 class="title"><span class="name">facemoji.face_detect</span> module</h1>
-  
+  <p>This module contains face detections functions.</p>
   
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-facemoji.face_detect', this);">Show source &equiv;</a></p>
   <div id="source-facemoji.face_detect" class="source">
-    <pre><code>import cv2
+    <pre><code>"""
+This module contains face detections functions.
+"""
+import cv2
 
 faceCascade = cv2.CascadeClassifier('models/haarcascade_frontalface_default.xml')
 

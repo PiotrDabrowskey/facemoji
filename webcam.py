@@ -1,3 +1,7 @@
+"""
+This module is the main module in this package. It loads emotion recognition model from a file,
+shows a webcam image, recognizes face and it's emotion and draw emotion on the image.
+"""
 from cv2 import WINDOW_NORMAL
 
 import cv2

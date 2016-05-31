@@ -1,3 +1,6 @@
+"""
+This module contains functions used to manipulate images in OpenCV and PIL's Image.
+"""
 import cv2
 import numpy as np
 
