@@ -1,6 +1,6 @@
 import cv2, os
 import glob
-from face_detect import detect_faces
+from face_detect import get_normalized_faces
 
 from shutil import copyfile
 
@@ -46,16 +46,12 @@ def extract_faces(emotions):
 
         for photo in photos:
             frame = cv2.imread(photo)
-            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-            faces = detect_faces(frame)
+            normalized_faces = get_normalized_faces(frame)
             os.remove(photo)
 
-            for (x, y, w, h) in faces:  # get coordinates and size of rectangle containing face
-                gray = gray[y:y + h, x:x + w]  # Cut the frame to size
-
+            for face in normalized_faces:
                 try:
-                    out = cv2.resize(gray, (350, 350))  # Resize face so all images have same size
-                    cv2.imwrite("data/sorted_set/%s/%s.png" % (emotion, filenumber), out)  # Write image
+                    cv2.imwrite("data/sorted_set/%s/%s.png" % (emotion, filenumber), face)  # Write image
                 except:
                     print('error in processing %s' %photo)
 
