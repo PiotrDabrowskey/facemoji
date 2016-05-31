@@ -12,11 +12,11 @@ It's just a bunch of python scripts. Together they:
 
 To see it in action you need:
 
-a) python
+1. python
 
-b) opencv
+2. opencv
 
-c) dataset to teach a model, but you can used one provided by us. It was teached on http://www.consortium.ri.cmu.edu/ckagree/
+3. dataset to teach a model, but you can used one provided by us. It was teached on http://www.consortium.ri.cmu.edu/ckagree/
 
 
 # screenshots
