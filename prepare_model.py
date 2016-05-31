@@ -47,7 +47,7 @@ def run_recognizer():
 if __name__ == '__main__':
     emotions = ["neutral", "anger", "disgust", "happy", "sadness", "surprise"]
 
-    for i in range(0, 2):
+    for i in range(0, 1):
         correct = run_recognizer()
         print "got", correct, "percent correct!"
 
