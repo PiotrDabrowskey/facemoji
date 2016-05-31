@@ -72,7 +72,7 @@ def extract_faces(emotions):
 
             for face in normalized_faces:
                 try:
-                    cv2.imwrite("data/sorted_set/%s/%s.png" % (emotion, file_number + 1), face)  # write image
+                    cv2.imwrite("data/sorted_set/%s/%s.png" % (emotion, file_number + 1), face[0])  # write image
                 except:
                     print("error in processing %s" % photo)
 
