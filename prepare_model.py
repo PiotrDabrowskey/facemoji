@@ -8,7 +8,10 @@ import cv2
 
 from image_commons import load_image
 
-fishface = cv2.createFisherFaceRecognizer()
+if cv2.__version__ != '3.1.0':
+    fishface = cv2.createFisherFaceRecognizer()
+else:
+    fishface = cv2.face.createFisherFaceRecognizer()
 training_set_size = 0.95
 
 
@@ -42,10 +45,10 @@ def make_sets():
 def run_recognizer():
     training_data, training_labels, prediction_data, prediction_labels = make_sets()
 
-    print "size of training set is:", len(training_labels), "images"
+    print("size of training set is:", len(training_labels), "images")
     fishface.train(training_data, np.asarray(training_labels))
 
-    print "predicting classification set"
+    print("predicting classification set")
     correct = sum(1 for id, image in enumerate(prediction_data) if fishface.predict(image)[0] == prediction_labels[id])
 
     return ((100 * correct) / len(prediction_data))
@@ -56,6 +59,6 @@ if __name__ == '__main__':
 
     for i in range(0, 1):
         correct = run_recognizer()
-        print "got", correct, "percent correct!"
+        print("got", correct, "percent correct!")
 
     fishface.save('models/emotion_detection_model.xml')
