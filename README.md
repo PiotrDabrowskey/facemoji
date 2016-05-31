@@ -15,13 +15,18 @@ If you don't have a dataset you can use a model teached by us and start from ste
 3. Run prepare_model.py to teach a model using /data/sorted_set/ files. You can specify list emotions you want to use. It saves a teached model to /models/emotion_detection_model.xml
 4. Run webcam.py. It opens a webcam stream, detect emotions on faces (using /models/emotion_detection_model.xml) and changes them to specified emojis (/graphics/)
 
-### how can i use it?
+### what do i need to run it?
 
 To see it in action you need:
 
 1. Python
 2. OpenCV
 3. Dataset to teach a model, but you can used one provided by us. It was teached on http://www.consortium.ri.cmu.edu/ckagree/
+
+### FAQ
+Q: I have my own emotion dataset. How can I use it with these scripts?
+
+A: You need to supply normalized images of faces with emotions. Use find_faces method from face_detect.py to find faces on your images. It returns cropped and normalized faces, save them to  to /data/sorted_set/%emotion_name%. Then run step 3 to teach a model and step 4 to begin swapping faces from webcam.
 
 ### screenshot
 ![05:38](/facemoji_screenshot.png?raw=true "05:38")
