@@ -8,12 +8,14 @@ from image_commons import load_image
 fishface = cv2.createFisherFaceRecognizer()
 training_set_size = 0.95
 
+
 def get_files(emotion):
-    files = glob.glob("data/sorted_set/%s/*" %emotion)
+    files = glob.glob("data/sorted_set/%s/*" % emotion)
     random.shuffle(files)
     training = files[:int(len(files) * training_set_size)]
     prediction = files[-int(len(files) * (1 - training_set_size)):]
     return training, prediction
+
 
 def make_sets():
     training_data = []
@@ -33,6 +35,7 @@ def make_sets():
 
     return training_data, training_labels, prediction_data, prediction_labels
 
+
 def run_recognizer():
     training_data, training_labels, prediction_data, prediction_labels = make_sets()
 
@@ -43,6 +46,7 @@ def run_recognizer():
     correct = sum(1 for id, image in enumerate(prediction_data) if fishface.predict(image)[0] == prediction_labels[id])
 
     return ((100 * correct) / len(prediction_data))
+
 
 if __name__ == '__main__':
     emotions = ["neutral", "anger", "disgust", "happy", "sadness", "surprise"]
