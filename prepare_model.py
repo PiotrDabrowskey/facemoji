@@ -2,7 +2,7 @@ import glob
 import random
 import numpy as np
 import cv2
-from image_converters import load_gray_image
+from image_commons import load_gray_image
 
 fishface = cv2.createFisherFaceRecognizer()
 
