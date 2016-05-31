@@ -23,7 +23,7 @@ To see it in action you need:
 2. OpenCV
 3. Dataset to teach a model, but you can used one provided by us. It was teached on http://www.consortium.ri.cmu.edu/ckagree/
 
-### FAQ
+### faq
 Q: **I have my own emotion dataset. How can I use it with these scripts?**
 
 A: You need to supply normalized images of faces with emotions. Use find_faces method from face_detect.py to find faces on your images. It returns cropped and normalized faces, save them to  to /data/sorted_set/%emotion_name%. Then run step 3 to teach a model and step 4 to begin swapping faces from webcam.
