@@ -10,7 +10,7 @@ It's just a bunch of python scripts. Together they:
 
 If you don't have a dataset you can use a model teached by us and start from step 4:
 
-1. Put dataset inside /data/ folder following tips from [Paul van Gent's blog post](http://www.paulvangent.com/2016/04/01/emotion-recognition-with-python-opencv-and-a-face-dataset/)
+1. Put CK emotions dataset inside /data/ folder following tips from [Paul van Gent's blog post](http://www.paulvangent.com/2016/04/01/emotion-recognition-with-python-opencv-and-a-face-dataset/)
 2. Run process_dataset.py. It harvests dataset and puts neutral and emotions images into /data/sorted_set/, it also normalizes them
 3. Run prepare_model.py to teach a model using /data/sorted_set/ files. You can specify list emotions you want to use. It saves a teached model to /models/emotion_detection_model.xml
 4. Run webcam.py. It opens a webcam stream, detect emotions on faces (using /models/emotion_detection_model.xml) and changes them to specified emojis (/graphics/)
