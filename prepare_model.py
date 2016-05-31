@@ -2,7 +2,8 @@ import glob
 import random
 import numpy as np
 import cv2
-from image_converters import load_image
+
+from image_commons import load_image
 
 fishface = cv2.createFisherFaceRecognizer()
 training_set_size = 0.95
