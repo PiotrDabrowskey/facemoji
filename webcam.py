@@ -1,7 +1,6 @@
 from cv2 import WINDOW_NORMAL
 
 import cv2
-
 from face_detect import find_faces
 from image_commons import nparray_as_image, draw_with_alpha
 
@@ -37,17 +36,13 @@ def show_webcam_and_run(model, emoticons, window_size=None, window_name='webcam'
         return
 
     while read_value:
-        faces_coordinates = find_faces(webcam_image)
-
-        for (x, y, w, h) in faces_coordinates:
-            face = webcam_image[y:y + h, x:x + w]
-            face = cv2.resize(face, (350, 350))  # resize to model's input
-            face = cv2.cvtColor(face, cv2.COLOR_BGR2GRAY)  # convert to grayscale
+        for normalized_face, (x, y, w, h) in find_faces(webcam_image):
             prediction = model.predict(face)  # do prediction
             if cv2.__version__ != '3.1.0':
                 prediction = prediction[0]
-            image_to_draw = emoticons[prediction]  # load emotion's graphic
-            draw_with_alpha(webcam_image, image_to_draw, (x, y, w, h))  # draw emotion over face
+
+            image_to_draw = emoticons[prediction]
+            draw_with_alpha(webcam_image, image_to_draw, x, y, w, h)
 
         cv2.imshow(window_name, webcam_image)
         read_value, webcam_image = vc.read()

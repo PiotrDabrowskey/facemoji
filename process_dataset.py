@@ -4,7 +4,7 @@ from shutil import copyfile
 
 import cv2
 
-from face_detect import get_normalized_faces
+from face_detect import find_faces
 
 
 def remove_old_set(emotions):
@@ -67,7 +67,7 @@ def extract_faces(emotions):
 
         for file_number, photo in enumerate(photos):
             frame = cv2.imread(photo)
-            normalized_faces = get_normalized_faces(frame)
+            normalized_faces = find_faces(frame)
             os.remove(photo)
 
             for face in normalized_faces:
