@@ -1,4 +1,4 @@
-# hey, what's that?
+### hey, what's that?
 
 It's just a bunch of python scripts. Together they:
 
@@ -8,7 +8,7 @@ It's just a bunch of python scripts. Together they:
 
 3. Swap faces to emoticons in real-time (using video stream from a webcam)
 
-# how can I use it?
+### how can I use it?
 
 To see it in action you need:
 
@@ -19,7 +19,7 @@ To see it in action you need:
 3. dataset to teach a model, but you can used one provided by us. It was teached on http://www.consortium.ri.cmu.edu/ckagree/
 
 
-# screenshots
+### screenshots
 
-# credits
+### credits
 todo
