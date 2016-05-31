@@ -1,6 +1,10 @@
 import cv2
 import numpy as np
-from PIL import Image
+
+if cv2.__version__ == '3.1.0':
+    from PIL import Image
+else:
+    import Image
 
 
 def image_as_nparray(image):
@@ -22,7 +26,7 @@ def nparray_as_image(nparray, mode='RGB'):
     return Image.fromarray(np.asarray(np.clip(nparray, 0, 255), dtype='uint8'), mode)
 
 
-def load_gray_image(source_path):
+def load_image(source_path):
     """
     Loads RGB image and converts it to grayscale.
     :param source_path: Image's source path.

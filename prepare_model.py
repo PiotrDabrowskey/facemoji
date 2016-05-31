@@ -2,15 +2,17 @@ import glob
 import random
 import numpy as np
 import cv2
-from image_commons import load_gray_image
+
+from image_commons import load_image
 
 fishface = cv2.createFisherFaceRecognizer()
+training_set_size = 0.95
 
 def get_files(emotion):
     files = glob.glob("data/sorted_set/%s/*" %emotion)
     random.shuffle(files)
-    training = files[:int(len(files)*0.9)]
-    prediction = files[-int(len(files)*0.1):]
+    training = files[:int(len(files) * training_set_size)]
+    prediction = files[-int(len(files) * (1 - training_set_size)):]
     return training, prediction
 
 def make_sets():
@@ -22,13 +24,11 @@ def make_sets():
         training, prediction = get_files(emotion)
 
         for item in training:
-            gray = load_gray_image(item)
-            training_data.append(gray)
+            training_data.append(load_image(item))
             training_labels.append(emotions.index(emotion))
 
         for item in prediction:
-            gray = load_gray_image(item)
-            prediction_data.append(gray)
+            prediction_data.append(load_image(item))
             prediction_labels.append(emotions.index(emotion))
 
     return training_data, training_labels, prediction_data, prediction_labels
@@ -47,7 +47,7 @@ def run_recognizer():
 if __name__ == '__main__':
     emotions = ["neutral", "anger", "disgust", "happy", "sadness", "surprise"]
 
-    for i in range(0, 2):
+    for i in range(0, 1):
         correct = run_recognizer()
         print "got", correct, "percent correct!"
 
