@@ -1,3 +1,6 @@
+"""
+Based on Paul Vangent's code from blog post: http://www.paulvangent.com/2016/04/01/emotion-recognition-with-python-opencv-and-a-face-dataset/
+"""
 import glob
 import random
 import numpy as np
