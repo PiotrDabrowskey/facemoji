@@ -46,7 +46,7 @@ def show_webcam_and_run(model, emoticons, window_size=None, window_name='webcam'
                 face = cv2.cvtColor(face, cv2.COLOR_BGR2GRAY)  # convert to grayscale
                 prediction = model.predict(face)  # do prediction
                 image_to_draw = emoticons[prediction]  # load emotion's graphic
-                draw_with_alpha(webcam_image, image_to_draw, x, y, w, h)  # draw emotion over face
+                draw_with_alpha(webcam_image, image_to_draw, (x, y, w, h))  # draw emotion over face
 
         cv2.imshow(window_name, webcam_image)
         read_value, webcam_image = vc.read()
