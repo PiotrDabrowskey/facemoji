@@ -1,6 +1,6 @@
 from cv2 import WINDOW_NORMAL
 import cv2
-from face_detect import find_faces, normalize_face
+from face_detect import find_faces
 from image_commons import nparray_as_image, image_as_nparray, draw_with_alpha
 
 def load_emoticons(emotions):
@@ -33,17 +33,14 @@ def show_webcam_and_run(model, emoticons, window_size=None, window_name='webcam'
         return
 
     while read_value:
-        faces_coordinates = find_faces(webcam_image)
-
-        for (x, y, w, h) in faces_coordinates:
-            normalized_face = normalize_face(webcam_image[y:y + h, x:x + w])
+        for normalized_face, (x, y, w, h) in find_faces(webcam_image):
             if cv2.__version__ == '3.1.0':
                 prediction = model.predict(normalized_face)
             else:
                 prediction = model.predict(normalized_face)[0]
 
             image_to_draw = emoticons[prediction]
-            
+
             draw_with_alpha(webcam_image, image_to_draw, x, y, w, h)
         
         cv2.imshow(window_name, webcam_image)
