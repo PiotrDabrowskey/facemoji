@@ -50,9 +50,9 @@ def harvest_dataset(emotions):
                     # do same for neutral image
                     source_filename = images[0].split('/')[-1]
                     # generate path to put neutral image
-                    source_filename = "data/sorted_set/neutral/%s" % source_filename
+                    destination_filename = "data/sorted_set/neutral/%s" % source_filename
                     # copy file
-                    copyfile("data/source_images/%s/%s" % (current_session, source_filename), source_filename)
+                    copyfile("data/source_images/%s/%s" % (current_session, source_filename), destination_filename)
                     neutral_added = True
 
 
