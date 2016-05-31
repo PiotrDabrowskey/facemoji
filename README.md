@@ -22,4 +22,5 @@ To see it in action you need:
 ### screenshots
 
 ### credits
-todo
+
+We got the idea (and harvesting of files) to use Cohn-Kanade dataset to classificate emotions from [Paul van Gent's blog post](http://www.paulvangent.com/2016/04/01/emotion-recognition-with-python-opencv-and-a-face-dataset/), thanks for that!
