@@ -3,8 +3,8 @@
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 
-    <title>tirt.face_detect API documentation</title>
-    <meta name="description" content="" />
+    <title>facemoji.process_dataset API documentation</title>
+    <meta name="description" content="Based on Paul van Gent's code from blog post: http://www.paulvangent.com/2016/04/01/emotion-recognit..." />
 
   <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,300' rel='stylesheet' type='text/css'>
   
@@ -969,18 +969,13 @@ table {
   <div id="sidebar">
     <h1>Index</h1>
     <ul id="index">
-    <li class="set"><h3><a href="#header-variables">Module variables</a></h3>
-      
-  <ul>
-    <li class="mono"><a href="#tirt.face_detect.faceCascade">faceCascade</a></li>
-  </ul>
-
-    </li>
 
     <li class="set"><h3><a href="#header-functions">Functions</a></h3>
       
   <ul>
-    <li class="mono"><a href="#tirt.face_detect.find_faces">find_faces</a></li>
+    <li class="mono"><a href="#facemoji.process_dataset.extract_faces">extract_faces</a></li>
+    <li class="mono"><a href="#facemoji.process_dataset.harvest_dataset">harvest_dataset</a></li>
+    <li class="mono"><a href="#facemoji.process_dataset.remove_old_set">remove_old_set</a></li>
   </ul>
 
     </li>
@@ -997,79 +992,224 @@ table {
 
 
   <header id="section-intro">
-  <h1 class="title"><span class="name">tirt.face_detect</span> module</h1>
+  <h1 class="title"><span class="name">facemoji.process_dataset</span> module</h1>
+  <p>Based on Paul van Gent's code from blog post: http://www.paulvangent.com/2016/04/01/emotion-recognition-with-python-opencv-and-a-face-dataset/</p>
   
-  
-  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-tirt.face_detect', this);">Show source &equiv;</a></p>
-  <div id="source-tirt.face_detect" class="source">
-    <pre><code>import cv2
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-facemoji.process_dataset', this);">Show source &equiv;</a></p>
+  <div id="source-facemoji.process_dataset" class="source">
+    <pre><code>"""
+Based on Paul van Gent's code from blog post: http://www.paulvangent.com/2016/04/01/emotion-recognition-with-python-opencv-and-a-face-dataset/
+"""
+import glob
+import os
+from shutil import copyfile
 
-faceCascade = cv2.CascadeClassifier('models/haarcascade_frontalface_default.xml')
+import cv2
 
-def find_faces(image):
-    faces_coordinates = _locate_faces(image)
-    cutted_faces = [image[y:y + h, x:x + w] for (x, y, w, h) in faces_coordinates]
-    normalized_faces = [_normalize_face(face) for face in cutted_faces]
-    return zip(normalized_faces, faces_coordinates)
+from face_detect import find_faces
 
-def _normalize_face(face):
-    face = cv2.cvtColor(face, cv2.COLOR_BGR2GRAY)
-    face = cv2.resize(face, (350, 350))
 
-    return face;
+def remove_old_set(emotions):
+    """
+    Removes old images produced from dataset.
+    :param emotions: List of emotions names.
+    """
+    print("Removing old dataset")
+    for emotion in emotions:
+        filelist = glob.glob("data/sorted_set/%s/*" % emotion)
+        for f in filelist:
+            os.remove(f)
 
-def _locate_faces(image):
-    faces = faceCascade.detectMultiScale(
-        image,
-        scaleFactor=1.1,
-        minNeighbors=15,
-        minSize=(70, 70)
-    )
 
-    return faces  # list of (x, y, w, h)
+def harvest_dataset(emotions):
+    """
+    Copies photos of participants in sessions to new folder.
+    :param emotions: List of emotions names.
+    """
+    print("Harvesting dataset")
+    participants = glob.glob('data/source_emotions/*')  # returns a list of all folders with participant numbers
 
-if __name__ == "__main__":
-    image = cv2.imread('test_data/test.jpg')
-    cv2.imshow("face", image)
+    for participant in participants:
+        neutral_added = False
 
-    for index, face in enumerate(find_faces(image)):
-        cv2.imshow("face %s" %index, face[0])
+        for sessions in glob.glob("%s/*" % participant):  # store list of sessions for current participant
+            for files in glob.glob("%s/*" % sessions):
+                current_session = files[20:-30]
+                file = open(files, 'r')
 
-    cv2.waitKey(0)
+                # emotions are encoded as a float, readline as float, then convert to integer
+                emotion = int(float(file.readline()))
+                images = glob.glob("data/source_images/%s/*" % current_session)
+
+                # get path for last image in sequence, which contains the emotion
+                source_filename = images[-1].split('/')[-1]
+                # do same for emotion containing image
+                destination_filename = "data/sorted_set/%s/%s" % (emotions[emotion], source_filename)
+                # copy file
+                copyfile("data/source_images/%s/%s" % (current_session, source_filename), destination_filename)
+
+                if not neutral_added:
+                    # do same for neutral image
+                    source_filename = images[0].split('/')[-1]
+                    # generate path to put neutral image
+                    destination_filename = "data/sorted_set/neutral/%s" % source_filename
+                    # copy file
+                    copyfile("data/source_images/%s/%s" % (current_session, source_filename), destination_filename)
+                    neutral_added = True
+
+
+def extract_faces(emotions):
+    """
+    Crops faces in emotions images.
+    :param emotions: List of emotions names.
+    """
+    print("Extracting faces")
+    for emotion in emotions:
+        photos = glob.glob('data/sorted_set/%s/*' % emotion)
+
+        for file_number, photo in enumerate(photos):
+            frame = cv2.imread(photo)
+            normalized_faces = find_faces(frame)
+            os.remove(photo)
+
+            for face in normalized_faces:
+                try:
+                    cv2.imwrite("data/sorted_set/%s/%s.png" % (emotion, file_number + 1), face[0])  # write image
+                except:
+                    print("error in processing %s" % photo)
+
+
+if __name__ == '__main__':
+    emotions = ['neutral', 'anger', 'contempt', 'disgust', 'fear', 'happy', 'sadness', 'surprise']
+    remove_old_set(emotions)
+    harvest_dataset(emotions)
+    extract_faces(emotions)
 </code></pre>
   </div>
 
   </header>
 
   <section id="section-items">
-    <h2 class="section-title" id="header-variables">Module variables</h2>
-      <div class="item">
-      <p id="tirt.face_detect.faceCascade" class="name">var <span class="ident">faceCascade</span></p>
-      
-  
-  <div class="source_cont">
-</div>
-
-      </div>
 
     <h2 class="section-title" id="header-functions">Functions</h2>
       
   <div class="item">
-    <div class="name def" id="tirt.face_detect.find_faces">
-    <p>def <span class="ident">find_faces</span>(</p><p>image)</p>
+    <div class="name def" id="facemoji.process_dataset.extract_faces">
+    <p>def <span class="ident">extract_faces</span>(</p><p>emotions)</p>
     </div>
     
 
     
   
+    <div class="desc"><p>Crops faces in emotions images.
+:param emotions: List of emotions names.</p></div>
   <div class="source_cont">
-  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-tirt.face_detect.find_faces', this);">Show source &equiv;</a></p>
-  <div id="source-tirt.face_detect.find_faces" class="source">
-    <pre><code>def find_faces(image):
-    faces_coordinates = _locate_faces(image)
-    cutted_faces = [image[y:y + h, x:x + w] for (x, y, w, h) in faces_coordinates]
-    normalized_faces = [_normalize_face(face) for face in cutted_faces]
-    return zip(normalized_faces, faces_coordinates)
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-facemoji.process_dataset.extract_faces', this);">Show source &equiv;</a></p>
+  <div id="source-facemoji.process_dataset.extract_faces" class="source">
+    <pre><code>def extract_faces(emotions):
+    """
+    Crops faces in emotions images.
+    :param emotions: List of emotions names.
+    """
+    print("Extracting faces")
+    for emotion in emotions:
+        photos = glob.glob('data/sorted_set/%s/*' % emotion)
+
+        for file_number, photo in enumerate(photos):
+            frame = cv2.imread(photo)
+            normalized_faces = find_faces(frame)
+            os.remove(photo)
+
+            for face in normalized_faces:
+                try:
+                    cv2.imwrite("data/sorted_set/%s/%s.png" % (emotion, file_number + 1), face[0])  # write image
+                except:
+                    print("error in processing %s" % photo)
+</code></pre>
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="facemoji.process_dataset.harvest_dataset">
+    <p>def <span class="ident">harvest_dataset</span>(</p><p>emotions)</p>
+    </div>
+    
+
+    
+  
+    <div class="desc"><p>Copies photos of participants in sessions to new folder.
+:param emotions: List of emotions names.</p></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-facemoji.process_dataset.harvest_dataset', this);">Show source &equiv;</a></p>
+  <div id="source-facemoji.process_dataset.harvest_dataset" class="source">
+    <pre><code>def harvest_dataset(emotions):
+    """
+    Copies photos of participants in sessions to new folder.
+    :param emotions: List of emotions names.
+    """
+    print("Harvesting dataset")
+    participants = glob.glob('data/source_emotions/*')  # returns a list of all folders with participant numbers
+
+    for participant in participants:
+        neutral_added = False
+
+        for sessions in glob.glob("%s/*" % participant):  # store list of sessions for current participant
+            for files in glob.glob("%s/*" % sessions):
+                current_session = files[20:-30]
+                file = open(files, 'r')
+
+                # emotions are encoded as a float, readline as float, then convert to integer
+                emotion = int(float(file.readline()))
+                images = glob.glob("data/source_images/%s/*" % current_session)
+
+                # get path for last image in sequence, which contains the emotion
+                source_filename = images[-1].split('/')[-1]
+                # do same for emotion containing image
+                destination_filename = "data/sorted_set/%s/%s" % (emotions[emotion], source_filename)
+                # copy file
+                copyfile("data/source_images/%s/%s" % (current_session, source_filename), destination_filename)
+
+                if not neutral_added:
+                    # do same for neutral image
+                    source_filename = images[0].split('/')[-1]
+                    # generate path to put neutral image
+                    destination_filename = "data/sorted_set/neutral/%s" % source_filename
+                    # copy file
+                    copyfile("data/source_images/%s/%s" % (current_session, source_filename), destination_filename)
+                    neutral_added = True
+</code></pre>
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="facemoji.process_dataset.remove_old_set">
+    <p>def <span class="ident">remove_old_set</span>(</p><p>emotions)</p>
+    </div>
+    
+
+    
+  
+    <div class="desc"><p>Removes old images produced from dataset.
+:param emotions: List of emotions names.</p></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-facemoji.process_dataset.remove_old_set', this);">Show source &equiv;</a></p>
+  <div id="source-facemoji.process_dataset.remove_old_set" class="source">
+    <pre><code>def remove_old_set(emotions):
+    """
+    Removes old images produced from dataset.
+    :param emotions: List of emotions names.
+    """
+    print("Removing old dataset")
+    for emotion in emotions:
+        filelist = glob.glob("data/sorted_set/%s/*" % emotion)
+        for f in filelist:
+            os.remove(f)
 </code></pre>
   </div>
 </div>

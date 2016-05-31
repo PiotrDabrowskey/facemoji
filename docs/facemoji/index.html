@@ -3,7 +3,7 @@
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 
-    <title>tirt.image_commons API documentation</title>
+    <title>facemoji API documentation</title>
     <meta name="description" content="" />
 
   <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,300' rel='stylesheet' type='text/css'>
@@ -970,18 +970,17 @@ table {
     <h1>Index</h1>
     <ul id="index">
 
-    <li class="set"><h3><a href="#header-functions">Functions</a></h3>
-      
-  <ul>
-    <li class="mono"><a href="#tirt.image_commons.draw_with_alpha">draw_with_alpha</a></li>
-    <li class="mono"><a href="#tirt.image_commons.image_as_nparray">image_as_nparray</a></li>
-    <li class="mono"><a href="#tirt.image_commons.load_image">load_image</a></li>
-    <li class="mono"><a href="#tirt.image_commons.nparray_as_image">nparray_as_image</a></li>
-  </ul>
 
+
+    <li class="set"><h3><a href="#header-submodules">Sub-modules</a></h3>
+      <ul>
+        <li class="mono"><a href="face_detect.m.html">facemoji.face_detect</a></li>
+        <li class="mono"><a href="image_commons.m.html">facemoji.image_commons</a></li>
+        <li class="mono"><a href="prepare_model.m.html">facemoji.prepare_model</a></li>
+        <li class="mono"><a href="process_dataset.m.html">facemoji.process_dataset</a></li>
+        <li class="mono"><a href="webcam.m.html">facemoji.webcam</a></li>
+      </ul>
     </li>
-
-
     </ul>
   </div>
 
@@ -993,194 +992,49 @@ table {
 
 
   <header id="section-intro">
-  <h1 class="title"><span class="name">tirt.image_commons</span> module</h1>
+  <h1 class="title"><span class="name">facemoji</span> module</h1>
   
   
-  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-tirt.image_commons', this);">Show source &equiv;</a></p>
-  <div id="source-tirt.image_commons" class="source">
-    <pre><code>import cv2
-import numpy as np
-
-if cv2.__version__ == '3.1.0':
-    from PIL import Image
-else:
-    import Image
-
-
-def image_as_nparray(image):
-    """
-    Converts PIL's Image to numpy's array.
-    :param image: PIL's Image object.
-    :return: Numpy's array of the image.
-    """
-    return np.asarray(image)
-
-
-def nparray_as_image(nparray, mode='RGB'):
-    """
-    Converts numpy's array of image to PIL's Image.
-    :param nparray: Numpy's array of image.
-    :param mode: Mode of the conversion. Defaults to 'RGB'.
-    :return: PIL's Image containing the image.
-    """
-    return Image.fromarray(np.asarray(np.clip(nparray, 0, 255), dtype='uint8'), mode)
-
-
-def load_image(source_path):
-    """
-    Loads RGB image and converts it to grayscale.
-    :param source_path: Image's source path.
-    :return: Image loaded from the path and converted to grayscale.
-    """
-    source_image = cv2.imread(source_path)
-    return cv2.cvtColor(source_image, cv2.COLOR_BGR2GRAY)
-
-
-def draw_with_alpha(source_image, image_to_draw, coordinates):
-    """
-    Draws a partially transparent image over another image.
-    :param source_image: Image to draw over.
-    :param image_to_draw: Image to draw.
-    :param coordinates: Coordinates to draw an image at. Tuple of x, y, width and height.
-    """
-    x, y, w, h = coordinates
-    image_to_draw = image_to_draw.resize((h, w), Image.ANTIALIAS)
-    image_array = image_as_nparray(image_to_draw)
-    for c in range(0, 3):
-        source_image[y:y + h, x:x + w, c] = image_array[:, :, c] * (image_array[:, :, 3] / 255.0) \
-                                            + source_image[y:y + h, x:x + w, c] * (1.0 - image_array[:, :, 3] / 255.0)
-</code></pre>
-  </div>
 
   </header>
 
   <section id="section-items">
 
-    <h2 class="section-title" id="header-functions">Functions</h2>
+
+
+    <h2 class="section-title" id="header-submodules">Sub-modules</h2>
+      <div class="item">
+      <p class="name"><a href="face_detect.m.html">facemoji.face_detect</a></p>
       
-  <div class="item">
-    <div class="name def" id="tirt.image_commons.draw_with_alpha">
-    <p>def <span class="ident">draw_with_alpha</span>(</p><p>source_image, image_to_draw, coordinates)</p>
-    </div>
-    
-
-    
   
-    <div class="desc"><p>Draws a partially transparent image over another image.
-:param source_image: Image to draw over.
-:param image_to_draw: Image to draw.
-:param coordinates: Coordinates to draw an image at. Tuple of x, y, width and height.</p></div>
-  <div class="source_cont">
-  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-tirt.image_commons.draw_with_alpha', this);">Show source &equiv;</a></p>
-  <div id="source-tirt.image_commons.draw_with_alpha" class="source">
-    <pre><code>def draw_with_alpha(source_image, image_to_draw, coordinates):
-    """
-    Draws a partially transparent image over another image.
-    :param source_image: Image to draw over.
-    :param image_to_draw: Image to draw.
-    :param coordinates: Coordinates to draw an image at. Tuple of x, y, width and height.
-    """
-    x, y, w, h = coordinates
-    image_to_draw = image_to_draw.resize((h, w), Image.ANTIALIAS)
-    image_array = image_as_nparray(image_to_draw)
-    for c in range(0, 3):
-        source_image[y:y + h, x:x + w, c] = image_array[:, :, c] * (image_array[:, :, 3] / 255.0) \
-                                            + source_image[y:y + h, x:x + w, c] * (1.0 - image_array[:, :, 3] / 255.0)
-</code></pre>
-  </div>
-</div>
 
-  </div>
-  
+      </div>
+      <div class="item">
+      <p class="name"><a href="image_commons.m.html">facemoji.image_commons</a></p>
       
-  <div class="item">
-    <div class="name def" id="tirt.image_commons.image_as_nparray">
-    <p>def <span class="ident">image_as_nparray</span>(</p><p>image)</p>
-    </div>
-    
-
-    
   
-    <div class="desc"><p>Converts PIL's Image to numpy's array.
-:param image: PIL's Image object.
-:return: Numpy's array of the image.</p></div>
-  <div class="source_cont">
-  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-tirt.image_commons.image_as_nparray', this);">Show source &equiv;</a></p>
-  <div id="source-tirt.image_commons.image_as_nparray" class="source">
-    <pre><code>def image_as_nparray(image):
-    """
-    Converts PIL's Image to numpy's array.
-    :param image: PIL's Image object.
-    :return: Numpy's array of the image.
-    """
-    return np.asarray(image)
-</code></pre>
-  </div>
-</div>
 
-  </div>
-  
+      </div>
+      <div class="item">
+      <p class="name"><a href="prepare_model.m.html">facemoji.prepare_model</a></p>
       
-  <div class="item">
-    <div class="name def" id="tirt.image_commons.load_image">
-    <p>def <span class="ident">load_image</span>(</p><p>source_path)</p>
-    </div>
-    
-
-    
   
-    <div class="desc"><p>Loads RGB image and converts it to grayscale.
-:param source_path: Image's source path.
-:return: Image loaded from the path and converted to grayscale.</p></div>
-  <div class="source_cont">
-  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-tirt.image_commons.load_image', this);">Show source &equiv;</a></p>
-  <div id="source-tirt.image_commons.load_image" class="source">
-    <pre><code>def load_image(source_path):
-    """
-    Loads RGB image and converts it to grayscale.
-    :param source_path: Image's source path.
-    :return: Image loaded from the path and converted to grayscale.
-    """
-    source_image = cv2.imread(source_path)
-    return cv2.cvtColor(source_image, cv2.COLOR_BGR2GRAY)
-</code></pre>
-  </div>
-</div>
+    <div class="desc"><p>Based on Paul van Gent's code from blog post: http://www.paulvangent.com/2016/04/01/emotion-recognition-with-python-opencv-and-a-face-dataset/</p></div>
 
-  </div>
-  
+      </div>
+      <div class="item">
+      <p class="name"><a href="process_dataset.m.html">facemoji.process_dataset</a></p>
       
-  <div class="item">
-    <div class="name def" id="tirt.image_commons.nparray_as_image">
-    <p>def <span class="ident">nparray_as_image</span>(</p><p>nparray, mode=&#39;RGB&#39;)</p>
-    </div>
-    
-
-    
   
-    <div class="desc"><p>Converts numpy's array of image to PIL's Image.
-:param nparray: Numpy's array of image.
-:param mode: Mode of the conversion. Defaults to 'RGB'.
-:return: PIL's Image containing the image.</p></div>
-  <div class="source_cont">
-  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-tirt.image_commons.nparray_as_image', this);">Show source &equiv;</a></p>
-  <div id="source-tirt.image_commons.nparray_as_image" class="source">
-    <pre><code>def nparray_as_image(nparray, mode='RGB'):
-    """
-    Converts numpy's array of image to PIL's Image.
-    :param nparray: Numpy's array of image.
-    :param mode: Mode of the conversion. Defaults to 'RGB'.
-    :return: PIL's Image containing the image.
-    """
-    return Image.fromarray(np.asarray(np.clip(nparray, 0, 255), dtype='uint8'), mode)
-</code></pre>
-  </div>
-</div>
+    <div class="desc"><p>Based on Paul van Gent's code from blog post: http://www.paulvangent.com/2016/04/01/emotion-recognition-with-python-opencv-and-a-face-dataset/</p></div>
 
-  </div>
+      </div>
+      <div class="item">
+      <p class="name"><a href="webcam.m.html">facemoji.webcam</a></p>
+      
   
 
-
+      </div>
   </section>
 
     </article>

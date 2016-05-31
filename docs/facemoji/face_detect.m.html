@@ -3,8 +3,8 @@
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 
-    <title>tirt.prepare_model API documentation</title>
-    <meta name="description" content="Based on Paul Vangent's code from blog post: http://www.paulvangent.com/2016/04/01/emotion-recogniti..." />
+    <title>facemoji.face_detect API documentation</title>
+    <meta name="description" content="" />
 
   <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,300' rel='stylesheet' type='text/css'>
   
@@ -972,8 +972,7 @@ table {
     <li class="set"><h3><a href="#header-variables">Module variables</a></h3>
       
   <ul>
-    <li class="mono"><a href="#tirt.prepare_model.fishface">fishface</a></li>
-    <li class="mono"><a href="#tirt.prepare_model.training_set_size">training_set_size</a></li>
+    <li class="mono"><a href="#facemoji.face_detect.faceCascade">faceCascade</a></li>
   </ul>
 
     </li>
@@ -981,9 +980,7 @@ table {
     <li class="set"><h3><a href="#header-functions">Functions</a></h3>
       
   <ul>
-    <li class="mono"><a href="#tirt.prepare_model.get_files">get_files</a></li>
-    <li class="mono"><a href="#tirt.prepare_model.make_sets">make_sets</a></li>
-    <li class="mono"><a href="#tirt.prepare_model.run_recognizer">run_recognizer</a></li>
+    <li class="mono"><a href="#facemoji.face_detect.find_faces">find_faces</a></li>
   </ul>
 
     </li>
@@ -1000,75 +997,45 @@ table {
 
 
   <header id="section-intro">
-  <h1 class="title"><span class="name">tirt.prepare_model</span> module</h1>
-  <p>Based on Paul Vangent's code from blog post: http://www.paulvangent.com/2016/04/01/emotion-recognition-with-python-opencv-and-a-face-dataset/</p>
+  <h1 class="title"><span class="name">facemoji.face_detect</span> module</h1>
   
-  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-tirt.prepare_model', this);">Show source &equiv;</a></p>
-  <div id="source-tirt.prepare_model" class="source">
-    <pre><code>"""
-Based on Paul Vangent's code from blog post: http://www.paulvangent.com/2016/04/01/emotion-recognition-with-python-opencv-and-a-face-dataset/
-"""
-import glob
-import random
-import numpy as np
-import cv2
+  
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-facemoji.face_detect', this);">Show source &equiv;</a></p>
+  <div id="source-facemoji.face_detect" class="source">
+    <pre><code>import cv2
 
-from image_commons import load_image
+faceCascade = cv2.CascadeClassifier('models/haarcascade_frontalface_default.xml')
 
-if cv2.__version__ != '3.1.0':
-    fishface = cv2.createFisherFaceRecognizer()
-else:
-    fishface = cv2.face.createFisherFaceRecognizer()
-training_set_size = 0.95
+def find_faces(image):
+    faces_coordinates = _locate_faces(image)
+    cutted_faces = [image[y:y + h, x:x + w] for (x, y, w, h) in faces_coordinates]
+    normalized_faces = [_normalize_face(face) for face in cutted_faces]
+    return zip(normalized_faces, faces_coordinates)
 
+def _normalize_face(face):
+    face = cv2.cvtColor(face, cv2.COLOR_BGR2GRAY)
+    face = cv2.resize(face, (350, 350))
 
-def get_files(emotion):
-    files = glob.glob("data/sorted_set/%s/*" % emotion)
-    random.shuffle(files)
-    training = files[:int(len(files) * training_set_size)]
-    prediction = files[-int(len(files) * (1 - training_set_size)):]
-    return training, prediction
+    return face;
 
+def _locate_faces(image):
+    faces = faceCascade.detectMultiScale(
+        image,
+        scaleFactor=1.1,
+        minNeighbors=15,
+        minSize=(70, 70)
+    )
 
-def make_sets():
-    training_data = []
-    training_labels = []
-    prediction_data = []
-    prediction_labels = []
-    for emotion in emotions:
-        training, prediction = get_files(emotion)
+    return faces  # list of (x, y, w, h)
 
-        for item in training:
-            training_data.append(load_image(item))
-            training_labels.append(emotions.index(emotion))
+if __name__ == "__main__":
+    image = cv2.imread('test_data/test.jpg')
+    cv2.imshow("face", image)
 
-        for item in prediction:
-            prediction_data.append(load_image(item))
-            prediction_labels.append(emotions.index(emotion))
+    for index, face in enumerate(find_faces(image)):
+        cv2.imshow("face %s" %index, face[0])
 
-    return training_data, training_labels, prediction_data, prediction_labels
-
-
-def run_recognizer():
-    training_data, training_labels, prediction_data, prediction_labels = make_sets()
-
-    print("size of training set is:", len(training_labels), "images")
-    fishface.train(training_data, np.asarray(training_labels))
-
-    print("predicting classification set")
-    correct = sum(1 for id, image in enumerate(prediction_data) if fishface.predict(image)[0] == prediction_labels[id])
-
-    return ((100 * correct) / len(prediction_data))
-
-
-if __name__ == '__main__':
-    emotions = ["neutral", "anger", "disgust", "happy", "sadness", "surprise"]
-
-    for i in range(0, 1):
-        correct = run_recognizer()
-        print("got", correct, "percent correct!")
-
-    fishface.save('models/emotion_detection_model.xml')
+    cv2.waitKey(0)
 </code></pre>
   </div>
 
@@ -1077,15 +1044,7 @@ if __name__ == '__main__':
   <section id="section-items">
     <h2 class="section-title" id="header-variables">Module variables</h2>
       <div class="item">
-      <p id="tirt.prepare_model.fishface" class="name">var <span class="ident">fishface</span></p>
-      
-  
-  <div class="source_cont">
-</div>
-
-      </div>
-      <div class="item">
-      <p id="tirt.prepare_model.training_set_size" class="name">var <span class="ident">training_set_size</span></p>
+      <p id="facemoji.face_detect.faceCascade" class="name">var <span class="ident">faceCascade</span></p>
       
   
   <div class="source_cont">
@@ -1096,85 +1055,21 @@ if __name__ == '__main__':
     <h2 class="section-title" id="header-functions">Functions</h2>
       
   <div class="item">
-    <div class="name def" id="tirt.prepare_model.get_files">
-    <p>def <span class="ident">get_files</span>(</p><p>emotion)</p>
+    <div class="name def" id="facemoji.face_detect.find_faces">
+    <p>def <span class="ident">find_faces</span>(</p><p>image)</p>
     </div>
     
 
     
   
   <div class="source_cont">
-  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-tirt.prepare_model.get_files', this);">Show source &equiv;</a></p>
-  <div id="source-tirt.prepare_model.get_files" class="source">
-    <pre><code>def get_files(emotion):
-    files = glob.glob("data/sorted_set/%s/*" % emotion)
-    random.shuffle(files)
-    training = files[:int(len(files) * training_set_size)]
-    prediction = files[-int(len(files) * (1 - training_set_size)):]
-    return training, prediction
-</code></pre>
-  </div>
-</div>
-
-  </div>
-  
-      
-  <div class="item">
-    <div class="name def" id="tirt.prepare_model.make_sets">
-    <p>def <span class="ident">make_sets</span>(</p><p>)</p>
-    </div>
-    
-
-    
-  
-  <div class="source_cont">
-  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-tirt.prepare_model.make_sets', this);">Show source &equiv;</a></p>
-  <div id="source-tirt.prepare_model.make_sets" class="source">
-    <pre><code>def make_sets():
-    training_data = []
-    training_labels = []
-    prediction_data = []
-    prediction_labels = []
-    for emotion in emotions:
-        training, prediction = get_files(emotion)
-
-        for item in training:
-            training_data.append(load_image(item))
-            training_labels.append(emotions.index(emotion))
-
-        for item in prediction:
-            prediction_data.append(load_image(item))
-            prediction_labels.append(emotions.index(emotion))
-
-    return training_data, training_labels, prediction_data, prediction_labels
-</code></pre>
-  </div>
-</div>
-
-  </div>
-  
-      
-  <div class="item">
-    <div class="name def" id="tirt.prepare_model.run_recognizer">
-    <p>def <span class="ident">run_recognizer</span>(</p><p>)</p>
-    </div>
-    
-
-    
-  
-  <div class="source_cont">
-  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-tirt.prepare_model.run_recognizer', this);">Show source &equiv;</a></p>
-  <div id="source-tirt.prepare_model.run_recognizer" class="source">
-    <pre><code>def run_recognizer():
-    training_data, training_labels, prediction_data, prediction_labels = make_sets()
-
-    print("size of training set is:", len(training_labels), "images")
-    fishface.train(training_data, np.asarray(training_labels))
-
-    print("predicting classification set")
-    correct = sum(1 for id, image in enumerate(prediction_data) if fishface.predict(image)[0] == prediction_labels[id])
-
-    return ((100 * correct) / len(prediction_data))
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-facemoji.face_detect.find_faces', this);">Show source &equiv;</a></p>
+  <div id="source-facemoji.face_detect.find_faces" class="source">
+    <pre><code>def find_faces(image):
+    faces_coordinates = _locate_faces(image)
+    cutted_faces = [image[y:y + h, x:x + w] for (x, y, w, h) in faces_coordinates]
+    normalized_faces = [_normalize_face(face) for face in cutted_faces]
+    return zip(normalized_faces, faces_coordinates)
 </code></pre>
   </div>
 </div>

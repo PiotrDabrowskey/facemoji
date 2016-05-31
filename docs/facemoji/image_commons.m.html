@@ -3,8 +3,8 @@
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 
-    <title>tirt.process_dataset API documentation</title>
-    <meta name="description" content="Based on Paul Vangent's code from blog post: http://www.paulvangent.com/2016/04/01/emotion-recogniti..." />
+    <title>facemoji.image_commons API documentation</title>
+    <meta name="description" content="" />
 
   <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,300' rel='stylesheet' type='text/css'>
   
@@ -973,9 +973,10 @@ table {
     <li class="set"><h3><a href="#header-functions">Functions</a></h3>
       
   <ul>
-    <li class="mono"><a href="#tirt.process_dataset.extract_faces">extract_faces</a></li>
-    <li class="mono"><a href="#tirt.process_dataset.harvest_dataset">harvest_dataset</a></li>
-    <li class="mono"><a href="#tirt.process_dataset.remove_old_set">remove_old_set</a></li>
+    <li class="mono"><a href="#facemoji.image_commons.draw_with_alpha">draw_with_alpha</a></li>
+    <li class="mono"><a href="#facemoji.image_commons.image_as_nparray">image_as_nparray</a></li>
+    <li class="mono"><a href="#facemoji.image_commons.load_image">load_image</a></li>
+    <li class="mono"><a href="#facemoji.image_commons.nparray_as_image">nparray_as_image</a></li>
   </ul>
 
     </li>
@@ -992,98 +993,62 @@ table {
 
 
   <header id="section-intro">
-  <h1 class="title"><span class="name">tirt.process_dataset</span> module</h1>
-  <p>Based on Paul Vangent's code from blog post: http://www.paulvangent.com/2016/04/01/emotion-recognition-with-python-opencv-and-a-face-dataset/</p>
+  <h1 class="title"><span class="name">facemoji.image_commons</span> module</h1>
   
-  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-tirt.process_dataset', this);">Show source &equiv;</a></p>
-  <div id="source-tirt.process_dataset" class="source">
-    <pre><code>"""
-Based on Paul Vangent's code from blog post: http://www.paulvangent.com/2016/04/01/emotion-recognition-with-python-opencv-and-a-face-dataset/
-"""
-import glob
-import os
-from shutil import copyfile
+  
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-facemoji.image_commons', this);">Show source &equiv;</a></p>
+  <div id="source-facemoji.image_commons" class="source">
+    <pre><code>import cv2
+import numpy as np
 
-import cv2
-
-from face_detect import find_faces
+if cv2.__version__ == '3.1.0':
+    from PIL import Image
+else:
+    import Image
 
 
-def remove_old_set(emotions):
+def image_as_nparray(image):
     """
-    Removes old images produced from dataset.
-    :param emotions: List of emotions names.
+    Converts PIL's Image to numpy's array.
+    :param image: PIL's Image object.
+    :return: Numpy's array of the image.
     """
-    print("Removing old dataset")
-    for emotion in emotions:
-        filelist = glob.glob("data/sorted_set/%s/*" % emotion)
-        for f in filelist:
-            os.remove(f)
+    return np.asarray(image)
 
 
-def harvest_dataset(emotions):
+def nparray_as_image(nparray, mode='RGB'):
     """
-    Copies photos of participants in sessions to new folder.
-    :param emotions: List of emotions names.
+    Converts numpy's array of image to PIL's Image.
+    :param nparray: Numpy's array of image.
+    :param mode: Mode of the conversion. Defaults to 'RGB'.
+    :return: PIL's Image containing the image.
     """
-    print("Harvesting dataset")
-    participants = glob.glob('data/source_emotions/*')  # returns a list of all folders with participant numbers
-
-    for participant in participants:
-        neutral_added = False
-
-        for sessions in glob.glob("%s/*" % participant):  # store list of sessions for current participant
-            for files in glob.glob("%s/*" % sessions):
-                current_session = files[20:-30]
-                file = open(files, 'r')
-
-                # emotions are encoded as a float, readline as float, then convert to integer
-                emotion = int(float(file.readline()))
-                images = glob.glob("data/source_images/%s/*" % current_session)
-
-                # get path for last image in sequence, which contains the emotion
-                source_filename = images[-1].split('/')[-1]
-                # do same for emotion containing image
-                destination_filename = "data/sorted_set/%s/%s" % (emotions[emotion], source_filename)
-                # copy file
-                copyfile("data/source_images/%s/%s" % (current_session, source_filename), destination_filename)
-
-                if not neutral_added:
-                    # do same for neutral image
-                    source_filename = images[0].split('/')[-1]
-                    # generate path to put neutral image
-                    destination_filename = "data/sorted_set/neutral/%s" % source_filename
-                    # copy file
-                    copyfile("data/source_images/%s/%s" % (current_session, source_filename), destination_filename)
-                    neutral_added = True
+    return Image.fromarray(np.asarray(np.clip(nparray, 0, 255), dtype='uint8'), mode)
 
 
-def extract_faces(emotions):
+def load_image(source_path):
     """
-    Crops faces in emotions images.
-    :param emotions: List of emotions names.
+    Loads RGB image and converts it to grayscale.
+    :param source_path: Image's source path.
+    :return: Image loaded from the path and converted to grayscale.
     """
-    print("Extracting faces")
-    for emotion in emotions:
-        photos = glob.glob('data/sorted_set/%s/*' % emotion)
-
-        for file_number, photo in enumerate(photos):
-            frame = cv2.imread(photo)
-            normalized_faces = find_faces(frame)
-            os.remove(photo)
-
-            for face in normalized_faces:
-                try:
-                    cv2.imwrite("data/sorted_set/%s/%s.png" % (emotion, file_number + 1), face[0])  # write image
-                except:
-                    print("error in processing %s" % photo)
+    source_image = cv2.imread(source_path)
+    return cv2.cvtColor(source_image, cv2.COLOR_BGR2GRAY)
 
 
-if __name__ == '__main__':
-    emotions = ['neutral', 'anger', 'contempt', 'disgust', 'fear', 'happy', 'sadness', 'surprise']
-    remove_old_set(emotions)
-    harvest_dataset(emotions)
-    extract_faces(emotions)
+def draw_with_alpha(source_image, image_to_draw, coordinates):
+    """
+    Draws a partially transparent image over another image.
+    :param source_image: Image to draw over.
+    :param image_to_draw: Image to draw.
+    :param coordinates: Coordinates to draw an image at. Tuple of x, y, width and height.
+    """
+    x, y, w, h = coordinates
+    image_to_draw = image_to_draw.resize((h, w), Image.ANTIALIAS)
+    image_array = image_as_nparray(image_to_draw)
+    for c in range(0, 3):
+        source_image[y:y + h, x:x + w, c] = image_array[:, :, c] * (image_array[:, :, 3] / 255.0) \
+                                            + source_image[y:y + h, x:x + w, c] * (1.0 - image_array[:, :, 3] / 255.0)
 </code></pre>
   </div>
 
@@ -1094,37 +1059,33 @@ if __name__ == '__main__':
     <h2 class="section-title" id="header-functions">Functions</h2>
       
   <div class="item">
-    <div class="name def" id="tirt.process_dataset.extract_faces">
-    <p>def <span class="ident">extract_faces</span>(</p><p>emotions)</p>
+    <div class="name def" id="facemoji.image_commons.draw_with_alpha">
+    <p>def <span class="ident">draw_with_alpha</span>(</p><p>source_image, image_to_draw, coordinates)</p>
     </div>
     
 
     
   
-    <div class="desc"><p>Crops faces in emotions images.
-:param emotions: List of emotions names.</p></div>
+    <div class="desc"><p>Draws a partially transparent image over another image.
+:param source_image: Image to draw over.
+:param image_to_draw: Image to draw.
+:param coordinates: Coordinates to draw an image at. Tuple of x, y, width and height.</p></div>
   <div class="source_cont">
-  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-tirt.process_dataset.extract_faces', this);">Show source &equiv;</a></p>
-  <div id="source-tirt.process_dataset.extract_faces" class="source">
-    <pre><code>def extract_faces(emotions):
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-facemoji.image_commons.draw_with_alpha', this);">Show source &equiv;</a></p>
+  <div id="source-facemoji.image_commons.draw_with_alpha" class="source">
+    <pre><code>def draw_with_alpha(source_image, image_to_draw, coordinates):
     """
-    Crops faces in emotions images.
-    :param emotions: List of emotions names.
+    Draws a partially transparent image over another image.
+    :param source_image: Image to draw over.
+    :param image_to_draw: Image to draw.
+    :param coordinates: Coordinates to draw an image at. Tuple of x, y, width and height.
     """
-    print("Extracting faces")
-    for emotion in emotions:
-        photos = glob.glob('data/sorted_set/%s/*' % emotion)
-
-        for file_number, photo in enumerate(photos):
-            frame = cv2.imread(photo)
-            normalized_faces = find_faces(frame)
-            os.remove(photo)
-
-            for face in normalized_faces:
-                try:
-                    cv2.imwrite("data/sorted_set/%s/%s.png" % (emotion, file_number + 1), face[0])  # write image
-                except:
-                    print("error in processing %s" % photo)
+    x, y, w, h = coordinates
+    image_to_draw = image_to_draw.resize((h, w), Image.ANTIALIAS)
+    image_array = image_as_nparray(image_to_draw)
+    for c in range(0, 3):
+        source_image[y:y + h, x:x + w, c] = image_array[:, :, c] * (image_array[:, :, 3] / 255.0) \
+                                            + source_image[y:y + h, x:x + w, c] * (1.0 - image_array[:, :, 3] / 255.0)
 </code></pre>
   </div>
 </div>
@@ -1133,53 +1094,26 @@ if __name__ == '__main__':
   
       
   <div class="item">
-    <div class="name def" id="tirt.process_dataset.harvest_dataset">
-    <p>def <span class="ident">harvest_dataset</span>(</p><p>emotions)</p>
+    <div class="name def" id="facemoji.image_commons.image_as_nparray">
+    <p>def <span class="ident">image_as_nparray</span>(</p><p>image)</p>
     </div>
     
 
     
   
-    <div class="desc"><p>Copies photos of participants in sessions to new folder.
-:param emotions: List of emotions names.</p></div>
+    <div class="desc"><p>Converts PIL's Image to numpy's array.
+:param image: PIL's Image object.
+:return: Numpy's array of the image.</p></div>
   <div class="source_cont">
-  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-tirt.process_dataset.harvest_dataset', this);">Show source &equiv;</a></p>
-  <div id="source-tirt.process_dataset.harvest_dataset" class="source">
-    <pre><code>def harvest_dataset(emotions):
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-facemoji.image_commons.image_as_nparray', this);">Show source &equiv;</a></p>
+  <div id="source-facemoji.image_commons.image_as_nparray" class="source">
+    <pre><code>def image_as_nparray(image):
     """
-    Copies photos of participants in sessions to new folder.
-    :param emotions: List of emotions names.
+    Converts PIL's Image to numpy's array.
+    :param image: PIL's Image object.
+    :return: Numpy's array of the image.
     """
-    print("Harvesting dataset")
-    participants = glob.glob('data/source_emotions/*')  # returns a list of all folders with participant numbers
-
-    for participant in participants:
-        neutral_added = False
-
-        for sessions in glob.glob("%s/*" % participant):  # store list of sessions for current participant
-            for files in glob.glob("%s/*" % sessions):
-                current_session = files[20:-30]
-                file = open(files, 'r')
-
-                # emotions are encoded as a float, readline as float, then convert to integer
-                emotion = int(float(file.readline()))
-                images = glob.glob("data/source_images/%s/*" % current_session)
-
-                # get path for last image in sequence, which contains the emotion
-                source_filename = images[-1].split('/')[-1]
-                # do same for emotion containing image
-                destination_filename = "data/sorted_set/%s/%s" % (emotions[emotion], source_filename)
-                # copy file
-                copyfile("data/source_images/%s/%s" % (current_session, source_filename), destination_filename)
-
-                if not neutral_added:
-                    # do same for neutral image
-                    source_filename = images[0].split('/')[-1]
-                    # generate path to put neutral image
-                    destination_filename = "data/sorted_set/neutral/%s" % source_filename
-                    # copy file
-                    copyfile("data/source_images/%s/%s" % (current_session, source_filename), destination_filename)
-                    neutral_added = True
+    return np.asarray(image)
 </code></pre>
   </div>
 </div>
@@ -1188,28 +1122,57 @@ if __name__ == '__main__':
   
       
   <div class="item">
-    <div class="name def" id="tirt.process_dataset.remove_old_set">
-    <p>def <span class="ident">remove_old_set</span>(</p><p>emotions)</p>
+    <div class="name def" id="facemoji.image_commons.load_image">
+    <p>def <span class="ident">load_image</span>(</p><p>source_path)</p>
     </div>
     
 
     
   
-    <div class="desc"><p>Removes old images produced from dataset.
-:param emotions: List of emotions names.</p></div>
+    <div class="desc"><p>Loads RGB image and converts it to grayscale.
+:param source_path: Image's source path.
+:return: Image loaded from the path and converted to grayscale.</p></div>
   <div class="source_cont">
-  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-tirt.process_dataset.remove_old_set', this);">Show source &equiv;</a></p>
-  <div id="source-tirt.process_dataset.remove_old_set" class="source">
-    <pre><code>def remove_old_set(emotions):
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-facemoji.image_commons.load_image', this);">Show source &equiv;</a></p>
+  <div id="source-facemoji.image_commons.load_image" class="source">
+    <pre><code>def load_image(source_path):
     """
-    Removes old images produced from dataset.
-    :param emotions: List of emotions names.
+    Loads RGB image and converts it to grayscale.
+    :param source_path: Image's source path.
+    :return: Image loaded from the path and converted to grayscale.
     """
-    print("Removing old dataset")
-    for emotion in emotions:
-        filelist = glob.glob("data/sorted_set/%s/*" % emotion)
-        for f in filelist:
-            os.remove(f)
+    source_image = cv2.imread(source_path)
+    return cv2.cvtColor(source_image, cv2.COLOR_BGR2GRAY)
+</code></pre>
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="facemoji.image_commons.nparray_as_image">
+    <p>def <span class="ident">nparray_as_image</span>(</p><p>nparray, mode=&#39;RGB&#39;)</p>
+    </div>
+    
+
+    
+  
+    <div class="desc"><p>Converts numpy's array of image to PIL's Image.
+:param nparray: Numpy's array of image.
+:param mode: Mode of the conversion. Defaults to 'RGB'.
+:return: PIL's Image containing the image.</p></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-facemoji.image_commons.nparray_as_image', this);">Show source &equiv;</a></p>
+  <div id="source-facemoji.image_commons.nparray_as_image" class="source">
+    <pre><code>def nparray_as_image(nparray, mode='RGB'):
+    """
+    Converts numpy's array of image to PIL's Image.
+    :param nparray: Numpy's array of image.
+    :param mode: Mode of the conversion. Defaults to 'RGB'.
+    :return: PIL's Image containing the image.
+    """
+    return Image.fromarray(np.asarray(np.clip(nparray, 0, 255), dtype='uint8'), mode)
 </code></pre>
   </div>
 </div>
