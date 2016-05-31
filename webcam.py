@@ -37,12 +37,12 @@ def show_webcam_and_run(model, emoticons, window_size=None, window_name='webcam'
 
     while read_value:
         for normalized_face, (x, y, w, h) in find_faces(webcam_image):
-            prediction = model.predict(face)  # do prediction
+            prediction = model.predict(normalized_face)  # do prediction
             if cv2.__version__ != '3.1.0':
                 prediction = prediction[0]
 
             image_to_draw = emoticons[prediction]
-            draw_with_alpha(webcam_image, image_to_draw, x, y, w, h)
+            draw_with_alpha(webcam_image, image_to_draw, (x, y, w, h))
 
         cv2.imshow(window_name, webcam_image)
         read_value, webcam_image = vc.read()
