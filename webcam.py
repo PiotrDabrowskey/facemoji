@@ -6,7 +6,7 @@ from face_detect import detect_faces
 from image_commons import nparray_as_image, draw_with_alpha
 
 
-def load_emoticons(emotions):
+def _load_emoticons(emotions):
     """
     Loads emotions images from graphics folder.
     :param emotions: Array of emotions names.
@@ -59,7 +59,7 @@ def show_webcam_and_run(model, emoticons, window_size=None, window_name='webcam'
 
 if __name__ == '__main__':
     emotions = ['neutral', 'anger', 'disgust', 'happy', 'sadness', 'surprise']
-    emoticons = load_emoticons(emotions)
+    emoticons = _load_emoticons(emotions)
 
     # load model
     fisher_face = cv2.face.createFisherFaceRecognizer()
