@@ -1,4 +1,5 @@
 """
+This file is responsible for harvesting CK database for images of emotions. It gets a neutral face and a emotion face for each subject.
 Based on Paul van Gent's code from blog post: http://www.paulvangent.com/2016/04/01/emotion-recognition-with-python-opencv-and-a-face-dataset/
 """
 import glob

@@ -1,4 +1,5 @@
 """
+This file contains logic responsible for teaching model on a processed dataset. It prints it's accuracy.
 Based on Paul van Gent's code from blog post: http://www.paulvangent.com/2016/04/01/emotion-recognition-with-python-opencv-and-a-face-dataset/
 """
 import glob
@@ -16,6 +17,10 @@ training_set_size = 0.95
 
 
 def get_files(emotion):
+    """
+    gets paths to all images of given emotion and splits them into two sets: trainging and test
+    :param emotion: name of emotion to find images for
+    """
     files = glob.glob("data/sorted_set/%s/*" % emotion)
     random.shuffle(files)
     training = files[:int(len(files) * training_set_size)]
@@ -24,6 +29,9 @@ def get_files(emotion):
 
 
 def make_sets():
+    """
+    method used to create datasets for all emotions. It loads both images and its labels to memory into training and test labels
+    """
     training_data = []
     training_labels = []
     prediction_data = []
@@ -43,6 +51,9 @@ def make_sets():
 
 
 def run_recognizer():
+    """
+    method is creating datasets using make_sets method, then it trains a model and tet with a test set. It returns correct guesses to test data count ratio
+    """
     training_data, training_labels, prediction_data, prediction_labels = make_sets()
 
     print("size of training set is:", len(training_labels), "images")
