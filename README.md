@@ -19,7 +19,8 @@ To see it in action you need:
 3. Dataset to teach a model, but you can used one provided by us. It was teached on http://www.consortium.ri.cmu.edu/ckagree/
 
 
-### screenshots
+### screenshot
+![05:38](/facemoji_screenshot.png?raw=true "05:38")
 
 ### credits
 
