@@ -1,3 +1,6 @@
+# based on http://www.pyimagesearch.com/2015/07/20/install-opencv-3-0-and-python-3-4-on-ubuntu/
+#!/usr/bin/env bash
+
 # upgrade pre-installed packages
 sudo apt-get update
 sudo apt-get upgrade
