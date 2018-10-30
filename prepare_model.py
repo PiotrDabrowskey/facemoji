@@ -9,10 +9,8 @@ import cv2
 
 from image_commons import load_image
 
-if cv2.__version__ != '3.1.0':
-    fishface = cv2.createFisherFaceRecognizer()
-else:
-    fishface = cv2.face.createFisherFaceRecognizer()
+
+fishface = cv2.face.FisherFaceRecognizer_create()
 training_set_size = 0.95
 
 

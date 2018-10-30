@@ -3,11 +3,7 @@ This module contains functions used to manipulate images in OpenCV and PIL's Ima
 """
 import cv2
 import numpy as np
-
-if cv2.__version__ == '3.1.0':
-    from PIL import Image
-else:
-    import Image
+from PIL import Image
 
 
 def image_as_nparray(image):
