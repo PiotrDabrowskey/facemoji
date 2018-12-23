@@ -14,8 +14,7 @@ def find_faces(image):
 def _normalize_face(face):
     face = cv2.cvtColor(face, cv2.COLOR_BGR2GRAY)
     face = cv2.resize(face, (350, 350))
-
-    return face;
+    return face
 
 def _locate_faces(image):
     faces = faceCascade.detectMultiScale(
@@ -24,7 +23,6 @@ def _locate_faces(image):
         minNeighbors=15,
         minSize=(70, 70)
     )
-
     return faces  # list of (x, y, w, h)
 
 if __name__ == "__main__":
